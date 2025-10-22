@@ -239,6 +239,149 @@ Other hosts: Netlify (with adapter), custom Node servers, Docker containers.
 
 ---
 
+## User authentication (Clerk)
+
+This project uses Clerk for authentication. The app includes example routes and components for sign-in / sign-up and a middleware to protect routes.
+
+### Quick setup (Clerk dashboard)
+1. Create an account at https://clerk.com and create a new application.
+2. Copy the following keys from the Clerk dashboard into your environment:
+   - CLERK_PUBLISHABLE_KEY or NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY (frontend)
+   - CLERK_SECRET_KEY (server)
+   - CLERK_FRONTEND_API (optional for some Clerk setups)
+
+Add them to `.env.local`:
+```
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
+CLERK_SECRET_KEY=sk_...
+CLERK_FRONTEND_API=clerk.your-app.clerk.com
+```
+Restart the dev server after adding env vars.
+
+### Install
+Clerk is already listed in package.json: `@clerk/nextjs`. If not installed:
+```bash
+npm install @clerk/nextjs
+```
+
+### Provider (app/layout.js)
+Wrap the app with ClerkProvider in the root layout (example already present in this repo):
+
+```jsx
+import { ClerkProvider } from "@clerk/nextjs";
+
+export default function RootLayout({ children }) {
+  return (
+    <ClerkProvider>
+      <html lang="en">
+        <body>{children}</body>
+      </html>
+    </ClerkProvider>
+  );
+}
+```
+
+### Sign-in / Sign-up pages (App Router)
+Use Clerk's pre-built components. Example pages (already in repo under app/(auth)):
+
+Sign-up page:
+```jsx
+// app/(auth)/sign-up/[[...sign-up]]/page.jsx
+import { SignUp } from "@clerk/nextjs";
+
+export default function SignUpPage() {
+  return <SignUp />;
+}
+```
+
+Sign-in page:
+```jsx
+// app/(auth)/sign-in/[[...sign-in]]/page.jsx
+import { SignIn } from "@clerk/nextjs";
+
+export default function SignInPage() {
+  return <SignIn />;
+}
+```
+
+Visit `/sign-in` and `/sign-up` to use them.
+
+### Header / UI controls
+Use Clerk UI components to show sign-in / user controls:
+
+```jsx
+// components/header.jsx
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+
+export default function Header() {
+  return (
+    <header>
+      <SignedOut>
+        <SignInButton />
+        <SignUpButton />
+      </SignedOut>
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
+    </header>
+  );
+}
+```
+
+### Protecting routes
+Two options:
+
+1) Middleware (repo includes middleware.js) — protects matching routes and redirects unauthenticated users to sign-in automatically.
+
+Example matcher in middleware.js (already present):
+```js
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/accounts(.*)",
+  "/transactions(.*)",
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth();
+  if (!userId && isProtectedRoute(req)) {
+    const { redirectToSignIn } = await auth();
+    return redirectToSignIn();
+  }
+});
+```
+
+2) Server-side guard (component-level)
+In app router server components you can check auth and redirect:
+
+```jsx
+// app/dashboard/page.jsx (server component)
+import { auth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+
+export default function DashboardPage() {
+  const { userId } = auth();
+  if (!userId) redirect("/sign-in");
+  return <div>Protected dashboard for {userId}</div>;
+}
+```
+
+### Accessing user data
+- Client components: use hooks or components from `@clerk/nextjs` (e.g., useUser(), UserButton).
+- Server components: call `auth()` from `@clerk/nextjs` (returns userId, sessionId, etc.) or fetch user via server SDK with CLERK_SECRET_KEY.
+
+### Common issues
+- "ClerkProvider" errors: ensure publishable key is available in environment or that provider is used in the root of the app.
+- Silent redirects: check middleware matcher and route patterns.
+- Missing env vars: restart dev server after changes.
+
+### References
+- Clerk Next.js docs: https://clerk.com/docs/nextjs
+- Clerk middleware: https://clerk.com/docs/reference/middleware
+
+---
+
 ## Contributing
 
 - Fork the repo and open a PR.
