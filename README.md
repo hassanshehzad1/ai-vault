@@ -401,3 +401,92 @@ export default function DashboardPage() {
 ## License
 
 - Add license as needed (e.g., MIT). Create a `LICENSE` file in the repo.
+
+## Header component
+
+Overview
+- The Header is a reusable top navigation component located at components/header.jsx.
+- It shows the site logo, navigation links and Clerk auth controls (SignInButton, UserButton).
+- The Header must be a client component because it uses Clerk client UI components.
+
+Location
+- File: components/header.jsx
+- Used in: app/layout.js
+
+Features
+- Logo (static asset)
+- Links shown only when the user is signed in (SignedIn)
+- Login button when signed out (SignedOut)
+- User menu (UserButton) when signed in
+- Tailwind-based styling and optional lucide-react icons
+
+How it works
+- Clerk client components (SignedIn, SignedOut, SignInButton, UserButton) only render on the client. Mark the Header file with "use client".
+- Place logos under public/ to reference them with "/logo.jpg" for simplest setup. Alternatively import an image asset from inside /app or /components and pass the imported value to next/image.
+
+Quick checklist
+- Add NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY to .env.local and restart dev server.
+- Ensure logo file is in public/ (recommended) or adjust import path.
+- Header must start with the "use client" directive.
+
+Example Header (recommended)
+- Move your logo to public/logo.jpg
+- Use this component (client) in components/header.jsx
+
+```javascript
+// filepath: [header.jsx](http://_vscodecontentref_/0)
+// ...existing code...
+'use client';
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+import { Button } from "./ui/button";
+import { LayoutDashboard, PenBox } from "lucide-react";
+
+export default function Header() {
+  return (
+    <div className="fixed top-0 bg-white/80 backdrop-blur-md w-full z-50 border-b border-gray-200">
+      <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <Link href="/">
+          <Image
+            src="/logo.jpg"        // file in public/logo.jpg
+            alt="AI Vault Logo"
+            height={48}
+            width={180}
+            className="object-contain h-12 w-auto"
+          />
+        </Link>
+
+        <div className="flex items-center space-x-4">
+          <SignedIn>
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <Button variant="outline" className="flex gap-2 items-center">
+                <LayoutDashboard size={16} />
+                <span className="hidden md:inline">Dashboard</span>
+              </Button>
+            </Link>
+
+            <Link href="/transactions/create" className="flex items-center gap-2">
+              <Button className="flex items-center gap-2">
+                <PenBox size={16} />
+                <span className="hidden md:inline">Create</span>
+              </Button>
+            </Link>
+          </SignedIn>
+
+          <SignedOut>
+            <SignInButton forceRedirectUrl="/dashboard">
+              <Button variant="outline">Login</Button>
+            </SignInButton>
+          </SignedOut>
+
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+        </div>
+      </nav>
+    </div>
+  );
+}
+// ...existing code...

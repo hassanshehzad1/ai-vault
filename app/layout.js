@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
           <Header />
           <main className="min-h-screen">{children}</main>
           {/* Footer */}
-          <footer className="bg-slate-100 py-12">
+          <footer className="bg-slate-50 py-12">
             <div className="container mx-auto px-4 text-center text-black">
               <p>© 2025 AI Vault. All rights reserved.</p>
             </div>
