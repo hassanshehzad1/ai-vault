@@ -41,6 +41,7 @@ AI Vault is a Next.js (App Router) project that serves as a starter for an AI-po
 - Git (optional)
 
 Windows-specific tips:
+
 - Remove build artifacts: use PowerShell or CMD:
   - PowerShell: Remove-Item -Recurse -Force .\.next
   - CMD: rmdir /s /q .next
@@ -50,12 +51,14 @@ Windows-specific tips:
 ## Installation (local)
 
 1. Clone repository (if applicable)
+
    ```bash
    git clone <repo-url>
    cd ai-vault
    ```
 
 2. Install dependencies
+
    ```bash
    npm install
    # or
@@ -65,12 +68,15 @@ Windows-specific tips:
    ```
 
 3. Create environment file
+
    - Copy example (create the file if it doesn't exist)
+
    ```bash
    copy .env.example .env.local   # Windows CMD/PowerShell
    # or
    cp .env.example .env.local    # macOS / Linux
    ```
+
    - Edit `.env.local` with your keys (see Environment variables section).
 
 4. Run dev server
@@ -106,6 +112,7 @@ Windows-specific tips:
 - lint — run ESLint
 
 Usage:
+
 ```bash
 npm run dev
 npm run build
@@ -146,6 +153,7 @@ npm run lint
 - Keep styling in Tailwind utility classes or component CSS modules where required.
 
 Recommended VS Code extensions:
+
 - ESLint
 - Tailwind CSS IntelliSense
 - Prettier (optional)
@@ -155,9 +163,11 @@ Recommended VS Code extensions:
 ## Linting & testing
 
 - Lint:
+
   ```bash
   npm run lint
   ```
+
   Ensure ESLint version and rules in `.eslintrc.json` are compatible with your environment.
 
 - Testing:
@@ -171,6 +181,7 @@ Recommended VS Code extensions:
 ## Build & production
 
 1. Build
+
    ```bash
    npm run build
    ```
@@ -226,11 +237,13 @@ Other hosts: Netlify (with adapter), custom Node servers, Docker containers.
 ## Troubleshooting
 
 - "Port already in use": kill existing process or change port:
+
   ```bash
   npx kill-port 3000
   # or start with a custom port
   PORT=3001 npm run dev
   ```
+
   (On Windows use PowerShell: $env:PORT=3001; npm run dev)
 
 - Stale build: delete `.next` and rebuild.
@@ -244,6 +257,7 @@ Other hosts: Netlify (with adapter), custom Node servers, Docker containers.
 This project uses Clerk for authentication. The app includes example routes and components for sign-in / sign-up and a middleware to protect routes.
 
 ### Quick setup (Clerk dashboard)
+
 1. Create an account at https://clerk.com and create a new application.
 2. Copy the following keys from the Clerk dashboard into your environment:
    - CLERK_PUBLISHABLE_KEY or NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY (frontend)
@@ -251,20 +265,25 @@ This project uses Clerk for authentication. The app includes example routes and 
    - CLERK_FRONTEND_API (optional for some Clerk setups)
 
 Add them to `.env.local`:
+
 ```
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
 CLERK_SECRET_KEY=sk_...
 CLERK_FRONTEND_API=clerk.your-app.clerk.com
 ```
+
 Restart the dev server after adding env vars.
 
 ### Install
+
 Clerk is already listed in package.json: `@clerk/nextjs`. If not installed:
+
 ```bash
 npm install @clerk/nextjs
 ```
 
 ### Provider (app/layout.js)
+
 Wrap the app with ClerkProvider in the root layout (example already present in this repo):
 
 ```jsx
@@ -282,9 +301,11 @@ export default function RootLayout({ children }) {
 ```
 
 ### Sign-in / Sign-up pages (App Router)
+
 Use Clerk's pre-built components. Example pages (already in repo under app/(auth)):
 
 Sign-up page:
+
 ```jsx
 // app/(auth)/sign-up/[[...sign-up]]/page.jsx
 import { SignUp } from "@clerk/nextjs";
@@ -295,6 +316,7 @@ export default function SignUpPage() {
 ```
 
 Sign-in page:
+
 ```jsx
 // app/(auth)/sign-in/[[...sign-in]]/page.jsx
 import { SignIn } from "@clerk/nextjs";
@@ -307,11 +329,18 @@ export default function SignInPage() {
 Visit `/sign-in` and `/sign-up` to use them.
 
 ### Header / UI controls
+
 Use Clerk UI components to show sign-in / user controls:
 
 ```jsx
 // components/header.jsx
-import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 
 export default function Header() {
   return (
@@ -329,11 +358,13 @@ export default function Header() {
 ```
 
 ### Protecting routes
+
 Two options:
 
-1) Middleware (repo includes middleware.js) — protects matching routes and redirects unauthenticated users to sign-in automatically.
+1. Middleware (repo includes middleware.js) — protects matching routes and redirects unauthenticated users to sign-in automatically.
 
 Example matcher in middleware.js (already present):
+
 ```js
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
@@ -352,8 +383,8 @@ export default clerkMiddleware(async (auth, req) => {
 });
 ```
 
-2) Server-side guard (component-level)
-In app router server components you can check auth and redirect:
+2. Server-side guard (component-level)
+   In app router server components you can check auth and redirect:
 
 ```jsx
 // app/dashboard/page.jsx (server component)
@@ -368,15 +399,18 @@ export default function DashboardPage() {
 ```
 
 ### Accessing user data
+
 - Client components: use hooks or components from `@clerk/nextjs` (e.g., useUser(), UserButton).
 - Server components: call `auth()` from `@clerk/nextjs` (returns userId, sessionId, etc.) or fetch user via server SDK with CLERK_SECRET_KEY.
 
 ### Common issues
+
 - "ClerkProvider" errors: ensure publishable key is available in environment or that provider is used in the root of the app.
 - Silent redirects: check middleware matcher and route patterns.
 - Missing env vars: restart dev server after changes.
 
 ### References
+
 - Clerk Next.js docs: https://clerk.com/docs/nextjs
 - Clerk middleware: https://clerk.com/docs/reference/middleware
 
@@ -405,15 +439,18 @@ export default function DashboardPage() {
 ## Header component
 
 Overview
+
 - The Header is a reusable top navigation component located at components/header.jsx.
 - It shows the site logo, navigation links and Clerk auth controls (SignInButton, UserButton).
 - The Header must be a client component because it uses Clerk client UI components.
 
 Location
+
 - File: components/header.jsx
 - Used in: app/layout.js
 
 Features
+
 - Logo (static asset)
 - Links shown only when the user is signed in (SignedIn)
 - Login button when signed out (SignedOut)
@@ -421,19 +458,22 @@ Features
 - Tailwind-based styling and optional lucide-react icons
 
 How it works
+
 - Clerk client components (SignedIn, SignedOut, SignInButton, UserButton) only render on the client. Mark the Header file with "use client".
 - Place logos under public/ to reference them with "/logo.jpg" for simplest setup. Alternatively import an image asset from inside /app or /components and pass the imported value to next/image.
 
 Quick checklist
+
 - Add NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY to .env.local and restart dev server.
 - Ensure logo file is in public/ (recommended) or adjust import path.
 - Header must start with the "use client" directive.
 
 Example Header (recommended)
+
 - Move your logo to public/logo.jpg
 - Use this component (client) in components/header.jsx
 
-```javascript
+````javascript
 // filepath: [header.jsx](http://_vscodecontentref_/0)
 // ...existing code...
 'use client';
@@ -489,4 +529,33 @@ export default function Header() {
     </div>
   );
 }
+
+
+Overview
+- The landing page (app/page.jsx) is the public home page with hero, stats, features, "how it works", testimonials and a CTA banner.
+- It is built from small components and a data file so you can update content without changing markup.
+
+Files & locations
+- Page component: app/page.jsx
+- Supporting components: components/hero.jsx (HeroSection), components/ui/* (Button, Card, etc.)
+- Content/data: data/landing.js — contains statsData, featuresData, howItWorksData, testimonialsData
+- Images: recommendations below
+
+What each section does
+- HeroSection (Hero) — top marketing area with main headline and primary CTA.
+- Stats — Shows quick numeric metrics from statsData.
+- Features — Grid of feature cards using featuresData items (icon, title, description).
+- How it works — 3-step explanatory grid using howItWorksData.
+- Testimonials — Cards rendering testimonialsData; uses next/image for avatars or remote URLs.
+- Banner / CTA — final call-to-action linking to /dashboard.
+
+How to edit content
+- Update copy and icons in data/landing.js. Example:
+```javascript
+// filepath: [landing.js](http://_vscodecontentref_/0)
 // ...existing code...
+export const statsData = [
+  { value: "150K+", label: "Active Users" }, // changed value
+  // ...
+];
+````

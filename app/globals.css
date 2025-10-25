@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -119,4 +118,43 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Hero Title */
+/* Utitlites */
+.gradient {
+  background-image: linear-gradient(
+    to bottom right,
+    #2563eb,
+    #9333ea
+  ); /* blue-600 to purple-600 */
+}
+
+.gradient-title {
+  background-image: linear-gradient(
+    to bottom right,
+    #334d50be,
+    #314158
+  ); /* blue-800 to purple-800 */
+  font-weight: 800; /* font-extrabold */
+  letter-spacing: -0.05em; /* tracking-tighter */
+  padding-right: 0.5rem; /* pr-2 */
+  padding-bottom: 0.5rem; /* pb-2 */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; /* text-transparent */
+}
+
+/* Hero Image */
+.hero-image-wrapper {
+  perspective: 1000px;
+}
+.hero-image {
+  transform: rotateX(18deg) scale(1);
+  transition: transform 0.5s ease-out;
+  will-change: transform;
+}
+
+.hero-image.scrolled {
+  transform: rotateX(0deg) scale(1) translateY(40px);
 }
