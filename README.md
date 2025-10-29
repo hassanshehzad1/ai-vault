@@ -559,3 +559,58 @@ export const statsData = [
   // ...
 ];
 ````
+...existing code...
+
+## Account Drawer & Dashboard
+
+Overview
+- The CreateAccountDrawer component provides an in-app drawer UI to create accounts from the Dashboard.
+- Location: `components/create-account-drawer.jsx`
+- Dashboard page: `app/(main)/dashboard/page.jsx` (uses the drawer as a trigger for the "Add New Account" card).
+
+Requirements
+- The drawer component must be a client component (`'use client'`) because it uses hooks/state and UI primitives.
+- Uses react-hook-form + zod resolver with `app/lib/schema.js` (`accountSchema`).
+- Drawer trigger must use `DrawerTrigger asChild` (or Radix `Dialog/Drawer` trigger pattern) so the passed child element (card) opens the drawer.
+
+Behavior
+- Usage pattern: wrap the element that should open the drawer with `<CreateAccountDrawer>{triggerElement}</CreateAccountDrawer>`.
+- The form must live inside the drawer content (inside `DrawerContent`) and call `handleSubmit(onSubmit)`; on success the drawer should close and form reset.
+- Ensure z-index: the header uses `z-50`. Drawer overlay/panel must use a higher z-index (e.g. `z-60` / `z-70`) so it appears above the header.
+
+Minimal usage example
+```jsx
+import CreateAccountDrawer from "@/components/create-account-drawer";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+
+export default function AccountsGrid() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <CreateAccountDrawer>
+        <Card className="hover:shadow-md transition-shadow cursor-pointer border-dashed">
+          <CardContent className="flex flex-col items-center justify-center text-muted-foreground h-full pt-5">
+            <Plus className="h-10 w-10 mb-2" />
+            <p className="text-sm font-medium">Add New Account</p>
+          </CardContent>
+        </Card>
+      </CreateAccountDrawer>
+      {/* other account cards */}
+    </div>
+  );
+}
+```
+
+Common issues & fixes
+- Nothing opens: ensure `components/create-account-drawer.jsx` begins with `'use client'` and exports a component that uses state (open/onOpenChange) and `DrawerTrigger asChild`.
+- Form not visible / inputs not registered: make sure the `<form>` is inside `DrawerContent` and inputs use `...register('fieldName')`.
+- Drawer hidden under header: increase drawer z-index > header (header uses `z-50`).
+- Validation errors: ensure `accountSchema` matches form field names and types (string vs number).
+- Trigger not clickable: verify `DrawerTrigger asChild` wraps the exact element passed as children (no extra wrappers that swallow clicks).
+
+Testing
+- Start dev server: `npm run dev`
+- Click the "Add New Account" card on Dashboard — drawer should open.
+- Fill form and submit — check console/API and confirm drawer closes and form resets.
+
+...existing code...
