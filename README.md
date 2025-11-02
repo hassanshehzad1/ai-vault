@@ -612,5 +612,32 @@ Testing
 - Start dev server: `npm run dev`
 - Click the "Add New Account" card on Dashboard — drawer should open.
 - Fill form and submit — check console/API and confirm drawer closes and form resets.
-
 ...existing code...
+
+## Creating an account (UI + backend flow)
+
+Files
+- components/create-account-drawer.jsx — drawer UI with the form and trigger card.
+- app/(main)/dashboard/page.jsx — Dashboard page that renders the trigger card.
+- app/lib/schema.js — Zod schema (accountSchema) used for validation.
+- hooks/use-fetch.js — helper to call createAccount action.
+- actions/dashboard.js — server action that creates account in DB.
+
+How it works
+- The "Add New Account" card on the Dashboard is wrapped with <CreateAccountDrawer>{card}</CreateAccountDrawer>. The card acts as the DrawerTrigger (asChild).
+- The drawer contains the form (inside DrawerContent). The form uses react-hook-form + zod resolver to validate input.
+- On submit the form calls the createAccount action (via useFetch). On success the drawer closes, the form resets, and a toast is shown.
+
+Important implementation notes
+- CreateAccountDrawer must be a client component: the file must start with 'use client'.
+- Using controlled UI (Select, Switch) requires setValue from react-hook-form. Example:
+  ```js
+  // inside component
+  const {
+    register,
+    handleSubmit,
+    setValue,        // <-- required for Select/Switch updates
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm({ resolver: zodResolver(accountSchema), defaultValues: { name: "", type: "CURRENT", balance: "", isDefault: false } });

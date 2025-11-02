@@ -1,7 +1,7 @@
 /* This code defines a React component called `CreateAccountDrawer`. This component renders a drawer
 that allows users to create a new account. */
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Drawer,
   DrawerClose,
@@ -24,6 +24,10 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Switch } from "./ui/switch";
+import useFetch from "@/hooks/use-fetch";
+import { createAccount } from "@/actions/dashboard";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const CreateAccountDrawer = ({ children }) => {
   const [open, setOpen] = useState(false);
@@ -44,10 +48,29 @@ const CreateAccountDrawer = ({ children }) => {
     },
   });
 
-  const onSubmit = (data) => {
+  const {
+    data: newAccount,
+    loading: createAccountLoading,
+    error,
+    fn: createAccountFn,
+  } = useFetch(createAccount);
+
+  useEffect(() => {
+    if (newAccount && !createAccountLoading) {
+      toast.success("Account created successfully");
+      reset();
+      setOpen(false);
+    }
+  }, [createAccountLoading, newAccount]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error("Error creating account: " + error);
+    }
+  }, [error]);
+  const onSubmit = async (data) => {
     console.log("create account", data);
-    setOpen(false);
-    reset();
+    await createAccountFn(data);
   };
 
   return (
@@ -138,7 +161,14 @@ const CreateAccountDrawer = ({ children }) => {
                 </Button>
               </DrawerClose>
               <Button type="submit" className="flex-1">
-                Create Account
+                {createAccountLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <span>Create Account</span>
+                )}
               </Button>
             </div>
           </form>
