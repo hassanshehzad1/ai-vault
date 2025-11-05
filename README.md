@@ -641,3 +641,38 @@ Important implementation notes
     reset,
     formState: { errors },
   } = useForm({ resolver: zodResolver(accountSchema), defaultValues: { name: "", type: "CURRENT", balance: "", isDefault: false } });
+  ...existing code...
+
+## Account Card (UI)
+
+Overview
+- AccountCard is the small card component used on the Dashboard to display a user's account summary.
+- Location: app/(main)/dashboard/_components/account-card.jsx
+- Purpose: show account name, balance, account type, default switch and quick income/expense indicators. The card links to the account detail page.
+
+Props
+- account (object) — required. Expected shape:
+  - id: string
+  - name: string
+  - balance: string | number
+  - type: "CURRENT" | "SAVINGS"
+  - isDefault: boolean
+
+Rendering details
+- Header: account name and a Switch that reflects `isDefault`.
+- Content: balance shown with two decimals (parseFloat(balance).toFixed(2)) and account type label (capitalized).
+- Footer: Income and Expense indicators with icons (lucide-react).
+
+Usage example
+```jsx
+import AccountCard from "@/app/(main)/dashboard/_components/account-card";
+
+const acc = {
+  id: "abc123",
+  name: "Checking",
+  balance: "1200.5",
+  type: "CURRENT",
+  isDefault: true,
+};
+
+<AccountCard account={acc} />
