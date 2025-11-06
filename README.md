@@ -1,3 +1,15 @@
+/**
+ * The function `updateDefaultAccount` updates the default account for a user in a database and returns
+ * a success message along with the serialized account data.
+ * @param accounts - The `accounts` parameter in the `serializeTransactions` function seems to
+ * represent an object containing transaction details. The function serializes the `balance` and
+ * `amount` properties of the `accounts` object by converting them to numbers before returning the
+ * serialized object.
+ * @returns The `updateDefaultAccount` function returns an object with either a `success` key set to
+ * `true` and a `data` key containing the serialized account transactions if the operation is
+ * successful, or a `success` key set to `false` and an `error` key containing the error message if an
+ * error occurs during the process.
+ */
 # AI Vault
 
 AI Vault is a Next.js (App Router) project that serves as a starter for an AI-powered UI. This README provides a complete setup, development, build, and deployment guide plus troubleshooting and contribution notes.
@@ -676,3 +688,42 @@ const acc = {
 };
 
 <AccountCard account={acc} />
+
+...existing code...
+
+## Update default account
+
+Overview
+- The app supports marking one account as the user's default. This is done via a server action `updateDefaultAccount` located in `actions/accounts.js`.
+- The action clears the existing default and sets the chosen account as default, then revalidates the dashboard route.
+
+Server behaviour
+- File: `actions/accounts.js`
+- Flow:
+  1. Validate user (`auth()`).
+  2. Find current user in DB.
+  3. Clear any existing default account: `db.account.updateMany({ where: { userId, isDefault: true }, data: { isDefault: false } })`.
+  4. Set target account as default: `db.account.update({ where: { id: accountId, userId }, data: { isDefault: true } })`.
+  5. Call `revalidatePath('/dashboard')` to refresh server-rendered dashboard content.
+- Returns: `{ success: true, data: serializedAccount }` on success, or `{ success: false, error: message }` on failure.
+- Note: serialization converts Decimal/BigInt fields (balance/amount) to numbers using `.toNumber()`.
+
+Client usage (AccountCard example)
+- The Dashboard `AccountCard` uses a client hook `useFetch` to call the server action. Typical pattern:
+
+jsx
+[account-card.jsx](http://_vscodecontentref_/0) (excerpt)
+import { updateDefaultAccount } from "@/actions/accounts";
+import useFetch from "@/hooks/use-fetch";
+import { Switch } from "@/components/ui/switch";
+
+const { loading, fn: updateDefaultFn, data: updatedAccount, error } = useFetch(updateDefaultAccount);
+
+const handleDefaultChange = async (event) => {
+  event.preventDefault();
+  if (isDefault) {
+    toast.warning("You need at least 1 default account");
+    return;
+  }
+  await updateDefaultFn(id);
+};

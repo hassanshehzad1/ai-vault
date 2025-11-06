@@ -1,3 +1,4 @@
+"use-client";
 /**
  * The `AccountCard` component in JavaScript React renders a card displaying account information with a
  * switch for default status and icons for income and expense.
@@ -7,6 +8,7 @@
  * default status, content with balance and account type, and a footer with income and expense
  * indicators. The card
  */
+import { updateDefaultAccount } from "@/actions/accounts";
 import {
   Card,
   CardContent,
@@ -15,21 +17,50 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import useFetch from "@/hooks/use-fetch";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
+import { toast } from "sonner";
 
 const AccountCard = ({ account }) => {
   const { name, type, balance, id, isDefault } = account;
+
+  const {
+    loading: updateDefaultLoading,
+    fn: updateDefaultFn,
+    data: updatedAccount,
+    error,
+  } = useFetch(updateDefaultAccount);
+
+  const handleDefaultChange = async (event) => {
+    event.preventDefault();
+    if (isDefault) {
+      toast.warning("You need at least 1 default account");
+      return;
+    }
+    await updateDefaultFn(id);
+  };
+
+  useEffect(() => {
+    if (updatedAccount) {
+      toast.success("Default account updated successfully");
+    }
+  }, [updatedAccount, updateDefaultLoading]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message || "Failed to update default account");
+    }
+  }, [error]);
   return (
     <Card className="hover:shadow-md transition-shadow  group relative">
-      <Link
-        href={`account/${id}`}
-       
-      >
+      <Link href={`account/${id}`}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium capitalize">{name}</CardTitle>
-          <Switch checked={isDefault} />
+          <CardTitle className="text-sm font-medium capitalize">
+            {name}
+          </CardTitle>
+          <Switch checked={isDefault} onClick={handleDefaultChange} disabled={updateDefaultLoading} />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
